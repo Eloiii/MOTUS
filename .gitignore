@@ -129,5 +129,3 @@ dist
 .pnp.*
 
 .idea
-
-/routes/mots.js
