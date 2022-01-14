@@ -14,7 +14,7 @@ function getRandomWord() {
     while (mot.length < 5 || mot.length > 8) {
         mot = mots[getRandomInt(mots.length)]
     }
-    CORRECTWORD = "CYANURES"
+    CORRECTWORD = mot
     getLettersStat()
     return CORRECTWORD
 }
@@ -69,8 +69,6 @@ function test(word) {
             }
         }
     }
-    console.log(cloneLettersStats)
-    console.log(res)
     return res
 }
 
