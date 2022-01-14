@@ -17,6 +17,8 @@ function getRandomWord() {
     return mot
 }
 
+const countOccurrences = (arr, val) => arr.reduce((a, v) => (v === val ? a + 1 : a), 0);
+
 function getLetterStat(letter, guessed) {
     let res = {}
     let alreadyGuessed = 0
@@ -25,12 +27,13 @@ function getLetterStat(letter, guessed) {
         let curLetter = CORRECTWORD.charAt(i)
         if(curLetter === letter) {
             letterCount++
-            if(guessed.includes(curLetter))
-                alreadyGuessed++
+            alreadyGuessed = countOccurrences(guessed, curLetter)
         }
     }
     res.guessed = alreadyGuessed
     res.total = letterCount
+    console.log(letter)
+    console.log(res)
     return res
 }
 
@@ -42,6 +45,7 @@ function test(word, guessed) {
         let indexOfLetter = CORRECTWORD.indexOf(word.charAt(letter))
         const letterStat = getLetterStat(word.charAt(letter), guessed)
         if(word.charAt(letter) === CORRECTWORD.charAt(letter)) {
+            guessed[letter] = word.charAt(letter)
             res.push({
                 letter: word.charAt(letter),
                 status: "CORRECT"
