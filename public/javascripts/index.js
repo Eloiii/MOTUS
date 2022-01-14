@@ -136,7 +136,8 @@ function parseRes(res) {
 }
 
 function checkGameOver() {
-    if (currentGuess >= GUESS_COUNT) {
+    console.log(guessedLetters)
+    if (currentGuess >= GUESS_COUNT && guessedLetters.includes(".")) {
         message.textContent = "Perdu... 😔 Le mot était " + word
         isGameOver = true
         return true
