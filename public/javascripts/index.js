@@ -137,7 +137,7 @@ function parseRes(res) {
 
 function checkGameOver() {
     if (currentGuess >= GUESS_COUNT) {
-        message.textContent = "Perdu... 😔"
+        message.textContent = "Perdu... 😔 Le mot était " + word
         isGameOver = true
         return true
     }
