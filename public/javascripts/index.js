@@ -1,20 +1,34 @@
-const response = await fetch(document.URL + "motauhasard")
-const word = await response.json()
+let response
+let word
+const GUESS_COUNT = 6
+let isGameOver
+
+let currentGuess
+let guessedLetters
+let currentGuessing
+
+
 const grid = document.querySelector(".grid")
 const message = document.querySelector(".message")
 
-const GUESS_COUNT = 6
-let isGameOver= false
-
-let currentGuess = 0
-let guessedLetters = []
-let currentGuessing = []
 
 document.addEventListener('keydown', parseKeyEvent);
+document.querySelector(".resetbtn").addEventListener("click", newGame)
 
-console.log(word)
-initLetterGuesses()
-initCSS()
+newGame().then()
+
+async function newGame() {
+    isGameOver = false
+    currentGuess = 0;
+    guessedLetters = []
+    currentGuessing = []
+    response = await fetch(document.URL + "motauhasard")
+    word = await response.json()
+    message.textContent = ""
+    initLetterGuesses()
+    initCSS()
+    console.log(word)
+}
 
 
 function initLetterGuesses() {
@@ -34,7 +48,7 @@ function initCSS() {
         for (let letter = 0; letter < word.length; letter++) {
             let DIVletter = document.createElement("div")
             DIVletter.className = "letter"
-            if(letter === 0 && row === 0)
+            if (letter === 0 && row === 0)
                 DIVletter.classList.add("CORRECT")
             if (row <= currentGuess) {
                 DIVletter.textContent = guessedLetters[letter]
@@ -55,7 +69,7 @@ function buildWord() {
     const DIVRow = document.querySelector(".row" + currentGuess)
     for (let letter = 0; letter < DIVRow.childNodes.length; letter++) {
         let replacementLetter;
-        if(currentGuessing.length !== 0)
+        if (currentGuessing.length !== 0)
             replacementLetter = "."
         else
             replacementLetter = guessedLetters[letter] || "."
@@ -64,7 +78,7 @@ function buildWord() {
 }
 
 function parseKeyEvent(e) {
-    if(isGameOver)
+    if (isGameOver)
         return
     if (e.keyCode >= 65 && e.keyCode <= 90 && currentGuessing.length < word.length) {
         currentGuessing.push(e.key.toUpperCase())
@@ -81,7 +95,7 @@ function parseKeyEvent(e) {
 function mergeArrays(array1, array2) {
     let res = []
     for (let i = 0; i < array1.length; i++) {
-        if(array1[i] !== ".")
+        if (array1[i] !== ".")
             res.push(array1[i])
         else res.push(array2[i])
     }
@@ -95,13 +109,13 @@ function validateGuess() {
         fetch(document.URL + "testWord", {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({word : guessingword, guessed: guessedLetters})
+            body: JSON.stringify({word: guessingword, guessed: guessedLetters})
         }).then(res => res.json()).then(res => parseRes(res.res))
     }
 }
 
 function parseRes(res) {
-    if(res === "NOTAWORD") {
+    if (res === "NOTAWORD") {
         const completeGuessing = mergeArrays(currentGuessing, guessedLetters)
         const guessingword = completeGuessing.join("")
         message.textContent = guessingword + " n'est pas un mot dans mon dictionnaire 🤨"
@@ -111,28 +125,28 @@ function parseRes(res) {
     const DIVRow = document.querySelector(".row" + currentGuess)
     for (let letter = 0; letter < DIVRow.childNodes.length; letter++) {
         DIVRow.childNodes[letter].classList.add(res[letter].status)
-        if(res[letter].status === "CORRECT") {
+        if (res[letter].status === "CORRECT") {
             guessedLetters[letter] = res[letter].letter
         }
     }
     currentGuess++;
     currentGuessing = []
-    if(!checkGameOver())
+    if (!checkGameOver())
         buildWord()
 }
 
 function checkGameOver() {
     console.log(currentGuess)
-    if(currentGuess >= GUESS_COUNT) {
+    if (currentGuess >= GUESS_COUNT) {
         message.textContent = "Perdu... 😔"
         isGameOver = true
         return true
     }
     for (let guessedLetter of guessedLetters) {
-
-        if(guessedLetter === ".")
+        if (guessedLetter === ".")
             return false
     }
     message.textContent = "GG BG 🎉"
+    isGameOver = true
     return true
 }
