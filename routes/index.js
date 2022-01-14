@@ -3,6 +3,7 @@ const router = express.Router();
 const {mots} = require('./mots')
 
 let CORRECTWORD = ""
+let lettersStat = new Map()
 
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
@@ -10,58 +11,66 @@ function getRandomInt(max) {
 
 function getRandomWord() {
     let mot = mots[getRandomInt(mots.length)]
-    while (mot.length < 5 || mot.length > 9) {
+    while (mot.length < 5 || mot.length > 8) {
         mot = mots[getRandomInt(mots.length)]
     }
-    CORRECTWORD = mot
-    return mot
+    CORRECTWORD = "CYANURES"
+    getLettersStat()
+    return CORRECTWORD
 }
 
-const countOccurrences = (arr, val) => arr.reduce((a, v) => (v === val ? a + 1 : a), 0);
 
-function getLetterStat(letter, guessed) {
-    let res = {}
-    let alreadyGuessed = 0
-    let letterCount = 0
-    for (let i = 0; i < CORRECTWORD.length; i++) {
-        let curLetter = CORRECTWORD.charAt(i)
-        if(curLetter === letter) {
-            letterCount++
-            alreadyGuessed = countOccurrences(guessed, curLetter)
+function getLettersStat() {
+    lettersStat = new Map()
+    let seenLetters = []
+    for (let letter = 0; letter < CORRECTWORD.length; letter++) {
+        const currLetter = CORRECTWORD.charAt(letter)
+        if(!seenLetters.includes(currLetter)) {
+            seenLetters.push(currLetter)
+            const occ = CORRECTWORD.split(currLetter).length - 1;
+            lettersStat.set(currLetter, occ)
         }
     }
-    res.guessed = alreadyGuessed
-    res.total = letterCount
-    console.log(letter)
-    console.log(res)
-    return res
 }
 
-function test(word, guessed) {
+function test(word) {
     if(mots.indexOf(word) === -1)
         return "NOTAWORD"
     let res = []
+    for (let i = 0; i < word.length; i++) {
+        res[i] = ""
+    }
+    let cloneLettersStats = new Map(lettersStat)
     for (let letter = 0; letter < word.length; letter++) {
-        let indexOfLetter = CORRECTWORD.indexOf(word.charAt(letter))
-        const letterStat = getLetterStat(word.charAt(letter), guessed)
-        if(word.charAt(letter) === CORRECTWORD.charAt(letter)) {
-            guessed[letter] = word.charAt(letter)
-            res.push({
-                letter: word.charAt(letter),
+        const currLetter = word.charAt(letter)
+        const currLetterocc = cloneLettersStats.get(currLetter)
+        if (currLetter === CORRECTWORD.charAt(letter)) {
+            res[letter] = {
+                letter: currLetter,
                 status: "CORRECT"
-            })
-        } else if(indexOfLetter !== -1 && indexOfLetter !== letter && letterStat.total !== letterStat.guessed) {
-            res.push({
-                letter: word.charAt(letter),
-                status: "MISPLACED"
-            })
-        } else {
-            res.push({
-                letter: word.charAt(letter),
-                status: "WRONG"
-            })
+            }
+            cloneLettersStats.set(currLetter, currLetterocc - 1)
         }
     }
+    for (let letter = 0; letter < word.length; letter++) {
+        const currLetter = word.charAt(letter)
+        const currLetterocc = cloneLettersStats.get(currLetter)
+        if(currLetterocc > 0 && res[letter] === "") {
+            res[letter] = {
+                letter: currLetter,
+                status: "MISPLACED"
+            }
+            cloneLettersStats.set(currLetter, currLetterocc - 1)
+        }
+        else if(res[letter] === ""){
+            res[letter] = {
+                letter: word.charAt(letter),
+                status: "WRONG"
+            }
+        }
+    }
+    console.log(cloneLettersStats)
+    console.log(res)
     return res
 }
 
@@ -77,8 +86,7 @@ router.get('/motauhasard', function (req, res) {
 
 router.post('/testWord', function (req, res) {
     const word = req.body.word
-    const guessedLetter = req.body.guessed
-    const testRes = test(word, guessedLetter)
+    const testRes = test(word)
     res.send({res : testRes})
 });
 

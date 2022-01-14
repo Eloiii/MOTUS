@@ -109,7 +109,7 @@ function validateGuess() {
         fetch(document.URL + "testWord", {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({word: guessingword, guessed: guessedLetters})
+            body: JSON.stringify({word: guessingword})
         }).then(res => res.json()).then(res => parseRes(res.res))
     }
 }
@@ -136,7 +136,6 @@ function parseRes(res) {
 }
 
 function checkGameOver() {
-    console.log(currentGuess)
     if (currentGuess >= GUESS_COUNT) {
         message.textContent = "Perdu... 😔"
         isGameOver = true
