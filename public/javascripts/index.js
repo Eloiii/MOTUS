@@ -10,6 +10,11 @@ let currentGuessing
 
 const grid = document.querySelector(".grid")
 const message = document.querySelector(".message")
+const mobileInput = document.querySelector(".mobileInput")
+const mobileMessage = document.querySelector(".mobileMessage")
+
+let currentInputState = mobileInput.textContent
+mobileInput.addEventListener("input", () => parseMobileInput())
 
 
 document.addEventListener('keydown', parseKeyEvent);
@@ -27,6 +32,15 @@ async function newGame() {
     message.textContent = ""
     initLetterGuesses()
     initCSS()
+    const letters = document.querySelectorAll(".letter")
+    for (let letter of letters) {
+        letter.addEventListener("click", () => {
+            mobileInput.style.visibility = "visible";
+            mobileInput.focus()
+            mobileInput.style.visibility = "hidden";
+            mobileMessage.style.display = "none";
+        })
+    }
     console.log(word)
 }
 
@@ -92,6 +106,21 @@ function parseKeyEvent(e) {
     buildWord()
 }
 
+function parseMobileInput() {
+    if(currentInputState.length > mobileInput.value)
+        currentGuessing.pop()
+    else {
+        const lastInput = mobileInput.value.charAt(mobileInput.value.length - 1)
+        if((/[a-zA-Z]/).test(lastInput)) {
+            currentGuessing.push(lastInput.toUpperCase())
+        }
+        else if(lastInput === " ")
+            validateGuess()
+    }
+    buildWord()
+    mobileInput.value = ""
+}
+
 function mergeArrays(array1, array2) {
     let res = []
     for (let i = 0; i < array1.length; i++) {
@@ -136,7 +165,6 @@ function parseRes(res) {
 }
 
 function checkGameOver() {
-    console.log(guessedLetters)
     if (currentGuess >= GUESS_COUNT && guessedLetters.includes(".")) {
         message.textContent = "Perdu... 😔 Le mot était " + word
         isGameOver = true
