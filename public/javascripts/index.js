@@ -111,7 +111,7 @@ function parseMobileInput() {
         currentGuessing.pop()
     else {
         const lastInput = mobileInput.value.charAt(mobileInput.value.length - 1)
-        if((/[a-zA-Z]/).test(lastInput)) {
+        if((/[a-zA-Z]/).test(lastInput) && currentGuessing.length < word.length) {
             currentGuessing.push(lastInput.toUpperCase())
         }
         else if(lastInput === " ")
