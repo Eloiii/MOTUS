@@ -24,7 +24,7 @@ newGame().then()
 
 async function newGame() {
     isGameOver = false
-    currentGuess = 0;
+    currentGuess = 0
     guessedLetters = []
     currentGuessing = []
     response = await fetch(document.URL + "motauhasard")
@@ -101,7 +101,13 @@ function parseKeyEvent(e) {
         currentGuessing.pop()
     }
     if (e.keyCode === 13) {
+        e.preventDefault()
         validateGuess()
+    }
+    if(e.keyCode === 32) {
+        e.preventDefault()
+        newGame().then()
+        return
     }
     buildWord()
 }
