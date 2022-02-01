@@ -41,7 +41,6 @@ async function newGame() {
             mobileMessage.style.display = "none";
         })
     }
-    console.log(word)
 }
 
 
