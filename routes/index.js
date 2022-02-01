@@ -34,6 +34,8 @@ function getLettersStat() {
 }
 
 function test(word) {
+    if(word.charAt(0) !== CORRECTWORD.charAt(0))
+        return "WRONGFIRSTLETTER"
     if(mots.indexOf(word) === -1)
         return "NOTAWORD"
     let res = []
@@ -80,6 +82,10 @@ router.get('/', function (req, res) {
 
 router.get('/motauhasard', function (req, res) {
     res.status(200).json(getRandomWord())
+})
+
+router.get('/reponse', function (req, res) {
+    res.status(200).json(CORRECTWORD)
 });
 
 router.post('/testWord', function (req, res) {

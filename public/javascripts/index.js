@@ -22,6 +22,10 @@ document.querySelector(".resetbtn").addEventListener("click", newGame)
 
 newGame().then()
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function newGame() {
     isGameOver = false
     currentGuess = 0
@@ -30,6 +34,7 @@ async function newGame() {
     response = await fetch(document.URL + "motauhasard")
     word = await response.json()
     message.textContent = ""
+    message.style.opacity = 0
     initLetterGuesses()
     initCSS()
     const letters = document.querySelectorAll(".letter")
@@ -91,6 +96,11 @@ function buildWord() {
 }
 
 function parseKeyEvent(e) {
+    if(e.keyCode === 32) {
+        e.preventDefault()
+        newGame().then()
+        return
+    }
     if (isGameOver)
         return
     if (e.keyCode >= 65 && e.keyCode <= 90 && currentGuessing.length < word.length) {
@@ -102,11 +112,6 @@ function parseKeyEvent(e) {
     if (e.keyCode === 13) {
         e.preventDefault()
         validateGuess()
-    }
-    if(e.keyCode === 32) {
-        e.preventDefault()
-        newGame().then()
-        return
     }
     buildWord()
 }
@@ -145,14 +150,32 @@ function validateGuess() {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({word: guessingword})
         }).then(res => res.json()).then(res => parseRes(res.res))
+    } else {
+        displayMessage("Le mot est trop court 😮‍💨", false)
     }
+}
+
+function displayMessage(text, resetGuess) {
+    message.textContent = text
+    message.style.opacity = 1
+    if(resetGuess)
+        currentGuessing = []
+    sleep(5000).then(() => message.style.opacity = 0)
 }
 
 function parseRes(res) {
     if (res === "NOTAWORD") {
         const completeGuessing = mergeArrays(currentGuessing, guessedLetters)
         const guessingword = completeGuessing.join("")
-        message.textContent = guessingword + " n'est pas un mot dans mon dictionnaire 🤨"
+        displayMessage(guessingword + " n'est pas un mot dans mon dictionnaire 🤨", true)
+        return
+    }
+    if(res === "WRONGFIRSTLETTER") {
+        displayMessage("Le mot doit commencer par un ", true)
+        const letterSpan = document.createElement("span")
+        letterSpan.textContent = word.charAt(0) + " 🙄"
+        letterSpan.className = "letterMessage"
+        message.appendChild(letterSpan)
         return
     }
     message.textContent = ""
@@ -171,7 +194,7 @@ function parseRes(res) {
 
 function checkGameOver() {
     if (currentGuess >= GUESS_COUNT && guessedLetters.includes(".")) {
-        message.textContent = "Perdu... 😔 Le mot était " + word
+        displayMessage("Perdu... 😔 Le mot était " + word, false)
         isGameOver = true
         return true
     }
@@ -179,7 +202,7 @@ function checkGameOver() {
         if (guessedLetter === ".")
             return false
     }
-    message.textContent = "GG BG 🎉"
+    displayMessage("GG BG 🎉", false)
     isGameOver = true
     return true
 }
