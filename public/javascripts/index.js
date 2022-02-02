@@ -40,9 +40,10 @@ async function newGame() {
     const letters = document.querySelectorAll(".letter")
     for (let letter of letters) {
         letter.addEventListener("click", () => {
-            mobileInput.style.visibility = "visible";
+            letter.focus()
+            mobileInput.style.opacity = "1";
             mobileInput.focus()
-            mobileInput.style.visibility = "hidden";
+            mobileInput.style.opacity = "0";
             mobileMessage.style.display = "none";
         })
     }

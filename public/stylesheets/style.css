@@ -18,6 +18,8 @@ body {
 
   .mobileInput {
     display: none;
+    background-color: #264653;
+    border: none;
   }
 
   .btnAndGrid {
@@ -35,7 +37,7 @@ body {
 @media only screen and (max-width: 768px) {
 
   .mobileInput {
-    visibility: hidden;
+    opacity: 0;
   }
 
   .btnAndGrid {
