@@ -20,23 +20,32 @@ mobileInput.addEventListener("input", () => parseMobileInput())
 document.addEventListener('keydown', parseKeyEvent);
 document.querySelector(".resetbtn").addEventListener("click", newGame)
 
-newGame().then()
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+await newGame()
 
 async function newGame() {
-    isGameOver = false
-    currentGuess = 0
-    guessedLetters = []
-    currentGuessing = []
-    response = await fetch(document.URL + "motauhasard")
-    word = await response.json()
+    initVars()
+    await getNewWord()
     message.textContent = ""
     message.style.opacity = "0"
     initLetterGuesses()
     initCSS()
+    setMobileEvents()
+
+}
+
+function initVars() {
+    isGameOver = false
+    currentGuess = 0
+    guessedLetters = []
+    currentGuessing = []
+}
+
+async function getNewWord() {
+    response = await fetch(document.URL + "motauhasard")
+    word = await response.json()
+}
+
+function setMobileEvents() {
     const letters = document.querySelectorAll(".letter")
     for (let letter of letters) {
         letter.addEventListener("click", () => {
@@ -49,11 +58,10 @@ async function newGame() {
     }
 }
 
-
 function initLetterGuesses() {
     for (let letterCount = 0; letterCount < word.length - 1; letterCount++) {
         if (letterCount === 0)
-            guessedLetters.push(word.charAt(0))
+            guessedLetters.push(word.firstLetter)
         guessedLetters.push(".")
     }
 }
@@ -97,19 +105,23 @@ function buildWord() {
 }
 
 async function parseKeyEvent(e) {
+    //space
     if (e.keyCode === 32) {
         e.preventDefault()
-        newGame().then()
+        await newGame()
         return
     }
     if (isGameOver)
         return
+    //a-z
     if (e.keyCode >= 65 && e.keyCode <= 90 && currentGuessing.length < word.length) {
         currentGuessing.push(e.key.toUpperCase())
     }
+    //backspace
     if (e.keyCode === 8) {
         currentGuessing.pop()
     }
+    //enter
     if (e.keyCode === 13) {
         e.preventDefault()
         await validateGuess()
@@ -152,7 +164,7 @@ async function validateGuess() {
             body: JSON.stringify({word: guessingword})
         })
         const res = await request.json()
-        parseRes(res.res)
+        await parseRes(res.res)
     } else {
         displayMessage("Le mot est trop court 😮‍💨", false)
     }
@@ -160,13 +172,14 @@ async function validateGuess() {
 
 function displayMessage(text, resetGuess) {
     message.textContent = text
+    message.style.opacity = "0"
     message.style.opacity = "1"
     if (resetGuess)
         currentGuessing = []
-    sleep(5000).then(() => message.style.opacity = "0")
+    sleep(4000).then(() => message.style.opacity = "0")
 }
 
-function parseRes(res) {
+async function parseRes(res) {
     if (res === "NOTAWORD") {
         const completeGuessing = mergeArrays(currentGuessing, guessedLetters)
         const guessingword = completeGuessing.join("")
@@ -176,7 +189,7 @@ function parseRes(res) {
     if (res === "WRONGFIRSTLETTER") {
         displayMessage("Le mot doit commencer par un ", true)
         const letterSpan = document.createElement("span")
-        letterSpan.textContent = word.charAt(0) + " 🙄"
+        letterSpan.textContent = word.firstLetter + " 🙄"
         letterSpan.className = "letterMessage"
         message.appendChild(letterSpan)
         return
@@ -191,13 +204,16 @@ function parseRes(res) {
     }
     currentGuess++;
     currentGuessing = []
-    if (!checkGameOver())
+    const gameOver = await checkGameOver()
+    if (!gameOver)
         buildWord()
 }
 
-function checkGameOver() {
+async function checkGameOver() {
     if (currentGuess >= GUESS_COUNT && guessedLetters.includes(".")) {
-        displayMessage("Perdu... 😔 Le mot était " + word, false)
+        const response = await fetch(document.URL + "CORRECTWORD")
+        const CORRECTWORD = await response.json()
+        displayMessage("Perdu... 😔 Le mot était " + CORRECTWORD, false)
         isGameOver = true
         return true
     }
@@ -208,4 +224,8 @@ function checkGameOver() {
     displayMessage("GG BG 🎉", false)
     isGameOver = true
     return true
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

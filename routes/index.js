@@ -16,7 +16,10 @@ function getRandomWord() {
     }
     CORRECTWORD = mot
     getLettersStat()
-    return CORRECTWORD
+    return {
+        length: CORRECTWORD.length,
+        firstLetter: CORRECTWORD.charAt(0)
+    }
 }
 
 
@@ -84,7 +87,7 @@ router.get('/motauhasard', function (req, res) {
     res.status(200).json(getRandomWord())
 })
 
-router.get('/reponse', function (req, res) {
+router.get('/CORRECTWORD', function (req, res) {
     res.status(200).json(CORRECTWORD)
 });
 
