@@ -34,7 +34,7 @@ async function newGame() {
     response = await fetch(document.URL + "motauhasard")
     word = await response.json()
     message.textContent = ""
-    message.style.opacity = 0
+    message.style.opacity = "0"
     initLetterGuesses()
     initCSS()
     const letters = document.querySelectorAll(".letter")
@@ -96,8 +96,8 @@ function buildWord() {
     }
 }
 
-function parseKeyEvent(e) {
-    if(e.keyCode === 32) {
+async function parseKeyEvent(e) {
+    if (e.keyCode === 32) {
         e.preventDefault()
         newGame().then()
         return
@@ -112,21 +112,21 @@ function parseKeyEvent(e) {
     }
     if (e.keyCode === 13) {
         e.preventDefault()
-        validateGuess()
+        await validateGuess()
     }
-    buildWord()
+    if(!isGameOver)
+        buildWord()
 }
 
-function parseMobileInput() {
-    if(currentInputState.length > mobileInput.value)
+async function parseMobileInput() {
+    if (currentInputState.length > mobileInput.value)
         currentGuessing.pop()
     else {
         const lastInput = mobileInput.value.charAt(mobileInput.value.length - 1)
-        if((/[a-zA-Z]/).test(lastInput) && currentGuessing.length < word.length) {
+        if ((/[a-zA-Z]/).test(lastInput) && currentGuessing.length < word.length) {
             currentGuessing.push(lastInput.toUpperCase())
-        }
-        else if(lastInput === " ")
-            validateGuess()
+        } else if (lastInput === " ")
+            await validateGuess()
     }
     buildWord()
     mobileInput.value = ""
@@ -142,15 +142,17 @@ function mergeArrays(array1, array2) {
     return res
 }
 
-function validateGuess() {
+async function validateGuess() {
     const completeGuessing = mergeArrays(currentGuessing, guessedLetters)
     if (completeGuessing.length === word.length) {
         const guessingword = completeGuessing.join("")
-        fetch(document.URL + "testWord", {
+        const request = await fetch(document.URL + "testWord", {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({word: guessingword})
-        }).then(res => res.json()).then(res => parseRes(res.res))
+        })
+        const res = await request.json()
+        parseRes(res.res)
     } else {
         displayMessage("Le mot est trop court 😮‍💨", false)
     }
@@ -158,10 +160,10 @@ function validateGuess() {
 
 function displayMessage(text, resetGuess) {
     message.textContent = text
-    message.style.opacity = 1
-    if(resetGuess)
+    message.style.opacity = "1"
+    if (resetGuess)
         currentGuessing = []
-    sleep(5000).then(() => message.style.opacity = 0)
+    sleep(5000).then(() => message.style.opacity = "0")
 }
 
 function parseRes(res) {
@@ -171,7 +173,7 @@ function parseRes(res) {
         displayMessage(guessingword + " n'est pas un mot dans mon dictionnaire 🤨", true)
         return
     }
-    if(res === "WRONGFIRSTLETTER") {
+    if (res === "WRONGFIRSTLETTER") {
         displayMessage("Le mot doit commencer par un ", true)
         const letterSpan = document.createElement("span")
         letterSpan.textContent = word.charAt(0) + " 🙄"

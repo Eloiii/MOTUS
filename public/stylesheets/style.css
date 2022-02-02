@@ -97,7 +97,7 @@ body {
   text-align: center;
   color: #e76f51;
   margin-bottom: 3vh;
-  transition: opacity 1s;
+  transition: opacity cubic-bezier(.08,.82,.17,1) 1s;
 }
 
 .letterMessage {
