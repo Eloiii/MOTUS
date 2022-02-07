@@ -15,6 +15,7 @@ const message = document.querySelector(".message")
 const mobileInput = document.querySelector(".mobileInput")
 const mobileMessage = document.querySelector(".mobileMessage")
 const streakDiv = document.querySelector(".streak")
+const historyDiv = document.querySelector(".history")
 
 let currentInputState = mobileInput.textContent
 mobileInput.addEventListener("input", () => parseMobileInput())
@@ -226,6 +227,7 @@ async function checkGameOver() {
         displayMessage("Perdu... 😔 Le mot était " + CORRECTWORD, false)
         isGameOver = true
         streak - 1 >= 0 ? streak = -1 : streak -=1
+        await updateHistory(false)
         return true
     }
     for (let guessedLetter of guessedLetters) {
@@ -235,7 +237,30 @@ async function checkGameOver() {
     displayMessage("GG BG 🎉", false)
     isGameOver = true
     streak + 1 <= 0 ? streak = 1 : streak +=1
+    await updateHistory(true)
     return true
+}
+
+async function updateHistory(won) {
+    const response = await fetch(document.URL + "CORRECTWORD")
+    const CORRECTWORD = await response.json()
+    const stats = {
+        word: CORRECTWORD,
+        stepCount: won ? currentGuess : -1
+    }
+    history.push(stats)
+    displayHistory()
+}
+
+function displayHistory() {
+    historyDiv.textContent = ""
+    for (let word of history) {
+        const div = document.createElement("div")
+        const suffix = word.stepCount >= 0 ? word.stepCount + "✅" : "❌"
+        div.textContent = word.word + " " + suffix
+        console.log(div)
+        historyDiv.append(div)
+    }
 }
 
 function sleep(ms) {
