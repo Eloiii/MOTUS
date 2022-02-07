@@ -7,11 +7,14 @@ let currentGuess
 let guessedLetters
 let currentGuessing
 
+let history = []
+let streak = 0
 
 const grid = document.querySelector(".grid")
 const message = document.querySelector(".message")
 const mobileInput = document.querySelector(".mobileInput")
 const mobileMessage = document.querySelector(".mobileMessage")
+const streakDiv = document.querySelector(".streak")
 
 let currentInputState = mobileInput.textContent
 mobileInput.addEventListener("input", () => parseMobileInput())
@@ -30,7 +33,14 @@ async function newGame() {
     initLetterGuesses()
     initCSS()
     setMobileEvents()
+    setStreak()
+}
 
+function setStreak() {
+    if(streak >= 0)
+        streakDiv.textContent = streak + "🔥"
+    else
+        streakDiv.textContent = Math.abs(streak) + "🥶"
 }
 
 function initVars() {
@@ -215,6 +225,7 @@ async function checkGameOver() {
         const CORRECTWORD = await response.json()
         displayMessage("Perdu... 😔 Le mot était " + CORRECTWORD, false)
         isGameOver = true
+        streak - 1 >= 0 ? streak = -1 : streak -=1
         return true
     }
     for (let guessedLetter of guessedLetters) {
@@ -223,6 +234,7 @@ async function checkGameOver() {
     }
     displayMessage("GG BG 🎉", false)
     isGameOver = true
+    streak + 1 <= 0 ? streak = 1 : streak +=1
     return true
 }
 
