@@ -221,9 +221,9 @@ async function parseRes(res) {
 }
 
 async function checkGameOver() {
+    const response = await fetch(document.URL + "CORRECTWORD")
+    const CORRECTWORD = await response.json()
     if (currentGuess >= GUESS_COUNT && guessedLetters.includes(".")) {
-        const response = await fetch(document.URL + "CORRECTWORD")
-        const CORRECTWORD = await response.json()
         displayMessage("Perdu... 😔 Le mot était " + CORRECTWORD, false)
         isGameOver = true
         streak - 1 >= 0 ? streak = -1 : streak -=1
@@ -234,11 +234,14 @@ async function checkGameOver() {
         if (guessedLetter === ".")
             return false
     }
-    displayMessage("GG BG 🎉", false)
-    isGameOver = true
-    streak + 1 <= 0 ? streak = 1 : streak +=1
-    await updateHistory(true)
-    return true
+    if(currentGuessing.join("") === CORRECTWORD) {
+        displayMessage("GG BG 🎉", false)
+        isGameOver = true
+        streak + 1 <= 0 ? streak = 1 : streak +=1
+        await updateHistory(true)
+        return true
+    }
+    return false
 }
 
 async function updateHistory(won) {
