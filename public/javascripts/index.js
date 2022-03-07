@@ -214,8 +214,8 @@ async function parseRes(res) {
         }
     }
     currentGuess++;
-    currentGuessing = []
     const gameOver = await checkGameOver()
+    currentGuessing = []
     if (!gameOver)
         buildWord()
 }
